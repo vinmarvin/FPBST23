@@ -1,102 +1,56 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-}
+    const saveNoteButton = document.getElementById('save-note');
+    const notesList = document.getElementById('notes');
+    const searchInput = document.getElementById('search');
 
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-header input {
-    padding: 10px;
-    width: 80%;
-    max-width: 400px;
-    margin-top: 10px;
-}
-
-.note-form {
-    margin-bottom: 20px;
-}
-
-.note-form input, .note-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-.note-form button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-}
-
-.note-form button:hover {
-    background-color: #0056b3;
-}
-
-.notes-list {
-    margin-top: 20px;
-}
-
-.notes-list h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.notes-list ul {
-    list-style: none;
-}
-
-.notes-list ul li {
-    background-color: white;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    position: relative;
-}
-
-.notes-list ul li .delete-note {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: red;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-.notes-list ul li .delete-note:hover {
-    background-color: darkred;
-}
-
-@media (max-width: 768px) {
-    header input {
-        width: 100%;
+    function renderNotes(filter = '') {
+        notesList.innerHTML = '';
+        notes
+            .filter(note => note.title.toLowerCase().includes(filter.toLowerCase()))
+            .forEach((note, index) => {
+                const noteItem = document.createElement('li');
+                noteItem.innerHTML = `
+                    <strong>${note.title}</strong>
+                    <p>${note.content}</p>
+                    <button class="delete-note" data-index="${index}">Delete</button>
+                `;
+                notesList.appendChild(noteItem);
+            });
     }
 
-    .note-form input, .note-form textarea, .note-form button {
-        width: 100%;
+    function saveNote() {
+        const title = document.getElementById('note-title').value;
+        const content = document.getElementById('note-content').value;
+
+        if (title && content) {
+            notes.push({ title, content });
+            localStorage.setItem('notes', JSON.stringify(notes));
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-content').value = '';
+            renderNotes();
+        }
     }
-}
+
+    function deleteNote(index) {
+        notes.splice(index, 1);
+        localStorage.setItem('notes', JSON.stringify(notes));
+        renderNotes();
+    }
+
+    notesList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-note')) {
+            const index = e.target.dataset.index;
+            deleteNote(index);
+        }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+        renderNotes(e.target.value);
+    });
+
+    saveNoteButton.addEventListener('click', saveNote);
+    
+    renderNotes();
+});
