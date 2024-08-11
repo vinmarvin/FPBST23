@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
         notesList.innerHTML = '';
         notes
             .filter(note => note.title.toLowerCase().includes(filter.toLowerCase()))
+            .slice()
+            .reverse()
             .forEach((note, index) => {
                 const noteItem = document.createElement('li');
                 noteItem.innerHTML = `
@@ -18,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 notesList.appendChild(noteItem);
             });
-    }
+    }    
 
     function saveNote() {
         const title = document.getElementById('note-title').value;
